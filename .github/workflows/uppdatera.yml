@@ -1,0 +1,83 @@
+name: Uppdatera förtidsröstningsdata
+
+# Jobbet gör två saker varje gång det kör:
+#   1. hämtar Valmyndighetens fil och krypterar den med huvudnyckeln
+#   2. skriver om nyckel.json, alltså huvudnyckeln inpackad i lösenordet
+#
+# Punkt 2 gör att lösenordet går att byta utan att någon datafil rörs: ändra
+# hemligheten KARTLOSEN och tryck Run workflow, så gäller det nya lösenordet
+# inom en minut. Valmyndigheten uppdaterar filen klockan 6 och 14, och siffrorna
+# kan revideras ända fram till den 16 september 2026.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rostdata
+  cancel-in-progress: false
+
+jobs:
+  hamta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kontrollera hemligheterna
+        env:
+          HN: ${{ secrets.KARTNYCKEL }}
+          LOSEN: ${{ secrets.KARTLOSEN }}
+        run: |
+          set -euo pipefail
+          test -n "$HN"    || { echo 'Hemligheten KARTNYCKEL saknas'; exit 1; }
+          test -n "$LOSEN" || { echo 'Hemligheten KARTLOSEN saknas'; exit 1; }
+          pip install --quiet cryptography
+
+      - name: Hämta röstfilen
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 10 --max-time 120 \
+            -o /tmp/rost.csv \
+            https://data.val.se/filer/val2026/rostmottagning/mottagna-fortidsroster-val2026.csv
+          # Vägra publicera en trasig eller avhuggen fil.
+          test "$(wc -c < /tmp/rost.csv)" -gt 100000
+          head -1 /tmp/rost.csv | grep -q 'LOKALID' || { echo 'Oväntad rubrikrad'; exit 1; }
+          grep -qi 'SUMMA' /tmp/rost.csv || { echo 'Summaraden saknas'; exit 1; }
+
+      - name: Kryptera och packa om nyckeln
+        env:
+          HN: ${{ secrets.KARTNYCKEL }}
+          LOSEN: ${{ secrets.KARTLOSEN }}
+        run: |
+          set -euo pipefail
+          python .github/scripts/kryptera.py fil /tmp/rost.csv rostdata.csv.enc --nyckel "$HN"
+          python .github/scripts/kryptera.py nyckelfil nyckel.json --nyckel "$HN" --losen "$LOSEN"
+          python - <<'PY'
+          import json, datetime
+          rader = sum(1 for _ in open('/tmp/rost.csv', encoding='utf-8-sig')) - 1
+          json.dump({'hamtad': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC'),
+                     'rader': rader}, open('senast.json', 'w'), ensure_ascii=False)
+          PY
+          # Klartexten får aldrig hamna i arkivet.
+          rm -f /tmp/rost.csv
+
+      - name: Committa om något ändrats
+        run: |
+          set -euo pipefail
+          git config user.name 'uppdateringsjobbet'
+          git config user.email 'actions@github.com'
+          git add rostdata.csv.enc nyckel.json senast.json
+          if git diff --cached --quiet; then
+            echo 'Inget nytt sedan förra hämtningen.'
+          else
+            git commit -m "Röstdata $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi

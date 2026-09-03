@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jämförelse av förtidsröstning 2026 och 2022</title>
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<style>
+:root{
+  --rod:#ED1B34; --neutral:#F5E9E1; --morkrod:#660027;
+  --mellanrod:#AD143D; --djuprod:#3D0019;
+  --gul:#FFC166; --gron:#009352; --lila:#7D17A3; --orange:#FC6E4C;
+  --ljusgul:#FFEEA9; --ljusgron:#A0D7BA; --ljuslila:#DFA7F9; --ljusorange:#FAD4CC;
+  --papper:#FBF8F5; --bg:#fff; --fg:#241018; --mut:#7d6a70; --line:#ded2cc;
+  --hairline:#ebe2dc; --panel:#fff; --grey:#b9adaa;
+  --serif:"Iowan Old Style","Hoefler Text",Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 var(--sans);background:var(--papper);color:var(--fg);
+  -webkit-font-smoothing:antialiased}
+/* ── huvud ── */
+.masthead{background:var(--djuprod);color:#fff;border-bottom:5px solid var(--rod)}
+.masthead .inre{max-width:1320px;margin:0 auto;padding:15px 22px 14px;display:flex;
+  align-items:center;gap:16px}
+.logga{height:46px;width:auto;display:block;flex:none}
+.masthead .strek{width:1px;align-self:stretch;background:rgba(255,255,255,.28);flex:none}
+h1{margin:0;font:600 21px/1.2 var(--serif);letter-spacing:.005em}
+.sub{color:#d9c2ca;font-size:12px;margin-top:4px;letter-spacing:.02em}
+.wrap{max-width:1320px;margin:0 auto;padding:0 22px 70px}
+/* ── formulär ── */
+input[type=search],input[type=password]{width:100%;padding:9px 11px;border:1px solid var(--line);
+  border-radius:0;font:14px var(--sans);background:#fff;color:var(--fg)}
+input:focus{outline:2px solid var(--rod);outline-offset:-2px;border-color:var(--rod)}
+button{padding:7px 13px;border:1px solid var(--line);background:#fff;border-radius:0;cursor:pointer;
+  font:600 11px/1.4 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--fg)}
+button:hover{border-color:var(--morkrod);color:var(--morkrod)}
+button[aria-pressed=true]{background:var(--morkrod);color:#fff;border-color:var(--morkrod)}
+/* ── kontroller ── */
+.ctl{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end;padding:18px 0 15px;
+  border-bottom:1px solid var(--line)}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp>span{font:600 10px/1 var(--sans);text-transform:uppercase;letter-spacing:.11em;color:var(--mut)}
+.seg{display:flex}
+.seg button{margin-left:-1px}
+.seg button:first-child{margin-left:0}
+label.chk{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap}
+label.chk input{accent-color:var(--morkrod)}
+/* ── dagreglage ── */
+.dagrad{display:flex;align-items:center;gap:16px;padding:15px 0 6px;border-bottom:1px solid var(--hairline)}
+.dagrad>span:first-child{font:600 10px/1 var(--sans);text-transform:uppercase;letter-spacing:.11em;
+  color:var(--mut);flex:none}
+.dagrad input[type=range]{flex:1;min-width:220px;accent-color:var(--rod)}
+.dagtext{font-size:13px;min-width:280px;font-variant-numeric:tabular-nums;color:var(--mut)}
+.dagtext b{color:var(--fg);font-weight:600}
+/* ── ytor ── */
+.lay{display:grid;grid-template-columns:1.35fr .85fr;gap:26px;margin-top:20px}
+@media(max-width:980px){.lay{grid-template-columns:1fr}}
+#karta{width:100%;height:700px;border:1px solid var(--line);overflow:hidden;background:#efe9e4}
+@media(max-width:980px){#karta{height:460px}}
+.maplibregl-popup-content{font:13px/1.5 var(--sans);color:var(--fg);border-radius:0;padding:9px 12px;
+  border:1px solid var(--line);box-shadow:none}
+.maplibregl-ctrl-group{border-radius:0!important;box-shadow:none!important;border:1px solid var(--line)}
+.legend{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;color:var(--mut);flex-wrap:wrap}
+.sw{display:inline-block;width:22px;height:11px;border:1px solid rgba(0,0,0,.18);vertical-align:middle}
+.card{border:1px solid var(--line);border-top:3px solid var(--morkrod);padding:16px 18px 17px;
+  background:var(--panel)}
+.card h3{margin:0 0 11px;font:600 16px/1.25 var(--serif);color:var(--morkrod)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:0 14px;font-size:13.5px;margin:0}
+.kv dt{color:var(--mut);padding:4px 0;border-top:1px solid var(--hairline)}
+.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;padding:4px 0;
+  border-top:1px solid var(--hairline);font-weight:500}
+.kv dt:first-of-type,.kv dd:first-of-type{border-top:none}
+.big {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--morkrod);
+  text-wrap: balance;
+}
+.pill{display:inline-block;padding:2px 8px;border:1px solid;font:600 10px/1.5 var(--sans);
+  letter-spacing:.06em;text-transform:uppercase}
+.A{background:var(--ljusgron);border-color:#7cbb9b;color:#00492a}
+.B{background:var(--ljusgul);border-color:#dcc472;color:#6b4e00}
+.C{background:var(--ljusorange);border-color:#e5a795;color:#7A2A14}
+.flag{background:var(--ljuslila);border-color:#c088e0;color:#40085A}
+/* ── text ── */
+.meth{margin-top:26px;font-size:13px;line-height:1.7;color:var(--mut);border-top:1px solid var(--line);
+  padding-top:14px;max-width:78ch}
+.meth b{color:var(--fg);font-weight:600}
+h2.sec{margin:38px 0 0;font:600 19px/1.25 var(--serif);color:var(--morkrod);
+  border-bottom:1px solid var(--line);padding-bottom:8px;display:flex;align-items:center;gap:10px}
+h2.sec::before{content:"";width:9px;height:9px;background:var(--rod);flex:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px}
+@media(max-width:980px){.two{grid-template-columns:1fr}}
+.warn{background:var(--ljusgul);border:1px solid var(--gul);border-left-width:3px;color:#6b4e00;
+  padding:8px 12px;font-size:12.5px;margin-top:12px}
+.dom{border-left:3px solid var(--rod);background:var(--papper);padding:10px 13px;margin-top:12px;
+  font-size:13.5px;line-height:1.6}
+.tag{font-size:11.5px;line-height:1.55;color:var(--mut);margin-top:8px}
+.fot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;
+  color:var(--mut);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+/* ── låsning ── */
+#grind{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.grindkort{width:100%;max-width:390px;background:#fff;border:1px solid var(--line);
+  border-top:5px solid var(--rod)}
+.grindtopp{background:var(--djuprod);padding:20px 24px}
+.grindtopp img{height:52px;display:block}
+.grindkropp{padding:22px 24px 24px}
+.grindkropp h2{margin:0 0 6px;font:600 19px/1.25 var(--serif);color:var(--morkrod)}
+.grindkropp p{color:var(--mut);font-size:13px;margin:0 0 16px;line-height:1.6}
+#oppna{width:100%;margin-top:12px;background:var(--rod);color:#fff;border-color:var(--rod);
+  padding:11px;font-size:12px}
+#oppna:hover{background:var(--morkrod);border-color:var(--morkrod);color:#fff}
+.fel{color:var(--mellanrod);font-size:12.5px;margin-top:11px;min-height:18px;line-height:1.5}
+#laddar{padding:16vh 22px;text-align:center;color:var(--mut);font-size:13px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="grind">
+  <div class="grindkort">
+    <div class="grindtopp"><img src="logga.svg" alt=""></div>
+    <div class="grindkropp">
+      <h2>Jämförelse av förtidsröstning 2026 och 2022</h2>
+      <p>Sidan är lösenordsskyddad.</p>
+      <p id="miljo" class="fel" style="display:none"></p>
+      <input id="pw" type="password" placeholder="Lösenord" autocomplete="current-password">
+      <button id="oppna">Öppna verktyget</button>
+      <div class="fel" id="fel"></div>
+    </div>
+  </div>
+</div>
+
+<div id="laddar" class="hide">Läser in underlaget…</div>
+
+<div id="app" class="hide">
+<div class="masthead"><div class="inre">
+  <img src="logga.svg" alt="" class="logga">
+  <div class="strek"></div>
+  <div>
+    <h1>Jämförelse av förtidsröstning 2026 och 2022</h1>
+    <div class="sub" id="subtitle"></div>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <div class="ctl">
+    <div class="grp"><span>Områdesnivå</span><div class="seg" id="niva">
+      <button data-v="kluster" aria-pressed="true">Kluster</button>
+      <button data-v="kommun" aria-pressed="false">Kommun</button>
+      <button data-v="ingen" aria-pressed="false">Ingen</button></div></div>
+    <div class="grp"><span>Mått</span><div class="seg" id="matt">
+      <button data-v="for" aria-pressed="true">Förändring mot 2022</button>
+      <button data-v="per26" aria-pressed="false">Röster per rb 2026 (%)</button>
+      <button data-v="per22" aria-pressed="false">Röster per rb 2022 (%)</button></div></div>
+    <div class="grp"><span>Färgskala</span><div class="seg" id="palett">
+      <button data-v="sekv" aria-pressed="true">Vit-mörkgrön</button>
+      <button data-v="safe" aria-pressed="false">Orange-lila</button>
+      <button data-v="rodgron" aria-pressed="false">Rött-grönt</button></div></div>
+    <div class="grp"><span>Extra lager</span>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <label class="chk"><input type="checkbox" id="lg_vd"> Valdeltagande 2022</label>
+        <label class="chk"><input type="checkbox" id="lg_l26"> Lokaler 2026 (vita stjärnor)</label>
+        <label class="chk"><input type="checkbox" id="lg_l22"> Lokaler 2022 (svarta punkter)</label>
+      </div></div>
+    <div class="grp"><span>Urval</span>
+      <button id="lagt" aria-pressed="false">Endast lågt valdeltagande</button></div>
+    <div class="grp" style="flex:1;min-width:160px"><span>Sök</span>
+      <input id="sok" type="search" placeholder="Kommun eller område"></div>
+  </div>
+
+  <div class="dagrad">
+    <span style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)">Till och med dag</span>
+    <input type="range" id="dag" min="1" max="19" step="1">
+    <span class="dagtext" id="dagtext"></span>
+  </div>
+
+  <div class="lay">
+    <div>
+      <div id="karta"></div>
+      <div class="legend" id="legend"></div>
+      <div class="legend" id="legend2"></div>
+      <div class="tag">
+        Klicka på ett område för detaljer. Scrolla för att zooma, dra för att flytta.</div>
+    </div>
+    <div>
+      <div class="card" id="riks"></div>
+      <div class="card" id="detalj" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <h2 class="sec" id="diagramrubrik">Utvecklingen dag för dag</h2>
+  <div class="two">
+    <div class="card"><h3>Mottagna röster per dag</h3><div id="stapel"></div>
+      <div class="tag" id="stapeltag"></div></div>
+    <div class="card"><h3>Kumulativt över perioden</h3><div id="linje"></div>
+      <div class="tag">Heldragen linje 2026, streckad 2022. Prickad linje är prognosen för resten av perioden.</div></div>
+  </div>
+
+  <!--<h2 class="sec">Prognos för hela perioden</h2>
+  <div id="prognos"></div>
+
+  <div class="meth">
+    Man får förtidsrösta var som helst i landet, så en del av rösterna i ett område kommer från
+    personer som bor någon annanstans. Måttet som visas är hur intensivt röstmottagningen sker i området
+    jämfört med 2022, inte valdeltagande.<br><br>
+
+    <b>Rapporteringen släpar 1-2 dygn</b> och olika mycket från olika lokaler. Preliminära data kan
+    revideras ända fram till den 16 september 2026. Områden med för få röster för att kunna jämföras rättvist visas grå.
+  </div>-->
+  <div class="fot"><span>Källa: Valmyndigheten, SCB. Bakgrundskarta © OpenStreetMap.</span><span id="fotdatum"></span></div>
+</div>
+</div>
+
+<script src="vendor/maplibre-gl.js"></script>
+<script>
+const F=new Intl.NumberFormat('sv-SE'), F1=new Intl.NumberFormat('sv-SE',{maximumFractionDigits:1});
+const pct=v=>v==null||!isFinite(v)?'-':(v>=0?'+':'')+F1.format(v*100)+' %';
+const andel=v=>v==null||!isFinite(v)?'-':F1.format(v*100)+' %';
+const num=v=>v==null||!isFinite(v)?'-':F.format(Math.round(v));
+const sgn=v=>v==null||!isFinite(v)?'-':(v>=0?'+':'')+F.format(Math.round(v));
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const kum=(a,n)=>a.slice(0,n).reduce((x,y)=>x+y,0);
+const summa=a=>a.reduce((x,y)=>x+y,0);
+
+const avb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+const TXT=new TextDecoder();
+let HUVUD=null, VDPNG=null;
+
+async function bytes(url){
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok) throw new Error(url+' gav '+r.status);
+  return new Uint8Array(await r.arrayBuffer());
+}
+/* Lösenordet låser upp huvudnyckeln, huvudnyckeln låser upp datafilerna.
+   Därför kan lösenordet bytas utan att en enda datafil skrivs om. */
+async function lasUpp(losen){
+  const nj=JSON.parse(TXT.decode(await bytes('nyckel.json')));
+  const bas=await crypto.subtle.importKey('raw',new TextEncoder().encode(losen),'PBKDF2',false,['deriveKey']);
+  const kek=await crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt:avb64(nj.salt),iterations:nj.iter,hash:'SHA-256'},bas,
+    {name:'AES-GCM',length:256},false,['decrypt']);
+  let ra;
+  try{ ra=await crypto.subtle.decrypt({name:'AES-GCM',iv:avb64(nj.iv)},kek,avb64(nj.nyckel)); }
+  catch(e){ throw new Error('LOSEN'); }
+  HUVUD=await crypto.subtle.importKey('raw',ra,{name:'AES-GCM'},false,['decrypt']);
+}
+async function hamta(url,typ){
+  const b=await bytes(url+'.enc');
+  const p=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(0,12)},HUVUD,b.slice(12)));
+  return typ==='bytes'?p:typ==='text'?TXT.decode(p):JSON.parse(TXT.decode(p));
+}
+
+function topo2geo(t,namn){
+  const o=t.objects[namn], tr=t.transform;
+  const arc=i=>{const a=t.arcs[i<0?~i:i];let x=0,y=0;const p=[];
+    for(const d of a){x+=d[0];y+=d[1];p.push([x*tr.scale[0]+tr.translate[0],y*tr.scale[1]+tr.translate[1]]);}
+    return i<0?p.slice().reverse():p;};
+  const ring=ids=>{let p=[];for(const i of ids){const s=arc(i);p=p.length?p.concat(s.slice(1)):s;}return p;};
+  return {type:'FeatureCollection',features:o.geometries.map(g=>({type:'Feature',properties:g.properties||{},
+    geometry:g.type==='Polygon'?{type:'Polygon',coordinates:g.arcs.map(ring)}
+            :g.type==='MultiPolygon'?{type:'MultiPolygon',coordinates:g.arcs.map(pl=>pl.map(ring))}
+            :{type:'Polygon',coordinates:[]}}))};
+}
+let DATA,ROST,SENAST,GEO={},VDMETA=null,KARTA=null,KLAR=false,
+    STATE={niva:'kluster',matt:'for',palett:'sekv',lagt:false,sel:null,sok:'',dag:null,
+           lg_vd:false,lg_l22:false,lg_l26:false};
+
+function miljokoll(){
+  if(location.protocol==='file:')
+    return 'Sidan är öppnad direkt från hårddisken. Webbläsaren stänger då av krypteringen. '+
+           'Kör  python -m http.server 8000  i mappen och öppna http://localhost:8000';
+  if(!window.isSecureContext||!crypto.subtle)
+    return 'Webbläsaren tillåter inte kryptering på den här adressen. Sidan måste nås via https '+
+           'eller http://localhost.';
+  return null;
+}
+(function(){const m=miljokoll();
+  if(m){const e=document.getElementById('miljo');e.style.display='block';e.textContent=m;}})();
+
+async function oppna(){
+  const pw=document.getElementById('pw').value, fel=document.getElementById('fel');
+  const m=miljokoll(); if(m){fel.textContent=m;return;}
+  if(!pw){fel.textContent='Skriv lösenordet först.';return;}
+  fel.textContent='Låser upp…';
+  try{ await lasUpp(pw); }
+  catch(ex){
+    fel.textContent = ex.message==='LOSEN' ? 'Fel lösenord.'
+      : 'Kunde inte läsa nyckel.json. Ligger den i samma mapp som index.html?';
+    return;
+  }
+  document.getElementById('grind').classList.add('hide');
+  document.getElementById('laddar').classList.remove('hide');
+  try{
+    const [kd,rd,k1,k2,l22,l26,vdm,png]=await Promise.all([
+      hamta('klusterdata.json'), hamta('rostdata.csv','text'),
+      hamta('geo_kluster.topojson'), hamta('geo_kommun.topojson'),
+      hamta('lokaler_2022.geojson'), hamta('lokaler_2026.geojson'),
+      hamta('valdeltagande_2022.json'), hamta('valdeltagande_2022.png','bytes')]);
+    DATA=kd; ROST=rd; GEO.kluster=topo2geo(k1,'data'); GEO.kommun=topo2geo(k2,'data');
+    GEO.l22=l22; GEO.l26=l26; VDMETA=vdm;
+    VDPNG=URL.createObjectURL(new Blob([png],{type:'image/png'}));
+    try{ SENAST=JSON.parse(TXT.decode(await bytes('senast.json'))); }catch(_){ SENAST=null; }
+    document.getElementById('laddar').classList.add('hide');
+    document.getElementById('app').classList.remove('hide');
+    start();
+  }catch(ex){
+    document.getElementById('laddar').classList.add('hide');
+    document.getElementById('grind').classList.remove('hide');
+    fel.textContent='Kunde inte läsa underlaget: '+esc(ex.message);
+  }
+}
+document.getElementById('oppna').onclick=oppna;
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')oppna();});
+
+
+/* ═══ KÄRNAN: verifierad mot arbetsboken, cell för cell ═══ */
+function parseRost(){
+  const rader=ROST.replace(/^\uFEFF/,'').split(/\r?\n/).filter(r=>r.trim());
+  const hd=rader[0].split(';'); const di=[]; for(let i=0;i<hd.length;i++) if(/^2026-\d\d-\d\d/.test(hd[i])) di.push(i);
+  const reg=new Map(), regLos=new Map();
+  for(const r of DATA.register){reg.set(r[0],r); regLos.set(r[1],r);}
+  const dag=new Array(19).fill(0), dagOmr=new Array(19).fill(0);
+  const perKluster=new Map(), perKommun=new Map(), perKommunOmr=new Map();
+  let utanHem=0, utanHemRoster=0;
+  for(let i=1;i<rader.length;i++){
+    const c=rader[i].split(';');
+    if(c.length<di.length) continue;
+    const lan=(c[0]||'').trim(), kom=(c[2]||'').trim(), lok=(c[5]||'').trim();
+    if(!lan||!kom||!lok||lok.toUpperCase()==='SUMMA') continue;   // summaraden ignoreras
+    const k4=('0'+lan).slice(-2)+('0'+kom).slice(-2);
+    const nyk=k4+'|'+lok.toUpperCase().replace(/\s+/g,' ').trim();
+    const los=k4+'|'+lok.toUpperCase().replace(/\s+/g,' ').replace(/[,.]/g,'').trim();
+    const rr=reg.get(nyk)||regLos.get(los);
+    const v=di.map(j=>{const x=parseInt((c[j]||'').replace(/\s/g,''),10);return isFinite(x)?x:0;});
+    const s=v.reduce((a,b)=>a+b,0);
+    if(!rr){utanHem++;utanHemRoster+=s;}
+    for(let d=0;d<19;d++){dag[d]+=v[d];}
+    const kk=perKommun.get(k4)||new Array(19).fill(0); v.forEach((x,d)=>kk[d]+=x); perKommun.set(k4,kk);
+    if(rr&&rr[3]==='o'&&rr[4]){
+      for(let d=0;d<19;d++) dagOmr[d]+=v[d];
+      const a=perKluster.get(rr[4])||new Array(19).fill(0); v.forEach((x,d)=>a[d]+=x); perKluster.set(rr[4],a);
+      const b=perKommunOmr.get(k4)||new Array(19).fill(0); v.forEach((x,d)=>b[d]+=x); perKommunOmr.set(k4,b);
+    }
+  }
+  let aktuell=0; for(let d=0;d<19;d++) if(dag[d]>0) aktuell=d+1;   // riksdagssumma > 0, inte "cellen har ett tal"
+  return {dag,dagOmr,perKluster,perKommun,perKommunOmr,aktuell:Math.max(1,aktuell),utanHem,utanHemRoster};
+}
+let R,ROWS,VALJARRIKET;
+const NOLL=new Array(19).fill(0);
+
+function bygg(N){
+  VALJARRIKET=DATA.meta.rostber_2026_riket/DATA.meta.rostber_2022_riket;
+  const r22o=kum(DATA.riket.r22o,N), r26o=R.dagOmr.slice(0,N).reduce((a,b)=>a+b,0);
+  const riketForandring=r22o>0?r26o/r22o:1;
+  const rikskurva=kum(DATA.riket.r22o,N)/(summa(DATA.riket.r22o)||1);
+  const komRb=new Map(DATA.kommun.map(k=>[k.kk,[k.rb22,k.rb26]]));
+  const mk=(id,namn,kommun,s22,s26,rb22,rb26,l22,l26,al,vd,fr,oe,h22,h26,nr,regso)=>{
+    const r22=kum(s22,N), r26=kum(s26,N), hela22=summa(s22);
+    const rbk=komRb.get(kommun.kk||kommun)||[1,1];
+    const justering=(rbk[1]/rbk[0])/VALJARRIKET;
+    const forvantat=r22*riketForandring*justering;
+    const bef=rb22>0?rb26/rb22-1:0, lf=Math.abs(l26-l22)/Math.max(l22,1);
+    let betyg='C';
+    if(fr!=null&&fr<=0.03&&oe<=0.25&&Math.abs(bef)<=0.05&&lf<=0.25&&r22>=50) betyg='A';
+    else if(fr!=null&&fr<=0.07&&Math.abs(bef)<=0.10&&lf<=0.50&&r22>=20) betyg='B';
+    // prognos: 2026 års nuläge skalat med hur stor andel av perioden som passerat 2022
+    const egen=hela22>=100?r22/hela22:0;
+    const kurva=egen>=0.03?egen:rikskurva, egenKurva=egen>=0.03;
+    const pred=kurva>0?r26/kurva:null;
+    const predPct=pred!=null&&rb26>0?pred/rb26:null;
+    return {id,namn,kommun:kommun.km||kommun,s22,s26,r22,r26,hela22,
+      d:r26-r22,pct:r22>0?r26/r22-1:null,
+      forvantat,avv:r26-forvantat,avvPct:forvantat>0?(r26-forvantat)/forvantat:null,
+      per26:rb26>0?r26/rb26:null, per22:rb22>0?r22/rb22:null,
+      rb22,rb26,l22,l26,al,vd,betyg,fr,h22,h26,nr,regso,
+      kurva,egenKurva,pred,predPct,marginal:predPct!=null&&vd?predPct-vd:null};
+  };
+  const kl=DATA.kluster.map(k=>mk(k.k,k.n,{kk:k.kk,km:k.km},k.r22,R.perKluster.get(k.k)||NOLL,
+      k.rb22,k.rb26,k.l22,k.l26,k.al,k.vd,k.fr,k.oe,k.h22,k.h26,k.nr,k.regso));
+  const km=DATA.kommun.map(k=>{
+    const g=DATA.kluster.filter(c=>c.kk===k.kk);
+    const rbTot=g.reduce((a,c)=>a+c.rb22,0)||1;
+    return mk(k.kk,k.km,{kk:k.kk,km:k.km},k.r22o,R.perKommunOmr.get(k.kk)||NOLL,k.rb22,k.rb26,
+      k.l22,k.l26,g.reduce((a,c)=>a+c.al*c.rb22,0)/rbTot,g.reduce((a,c)=>a+c.vd*c.rb22,0)/rbTot,
+      g.length?g.reduce((a,c)=>a+c.fr*c.rb22,0)/rbTot:0,0,0,0,g.length,'');
+  });
+  ROWS={kluster:kl,kommun:km,riketForandring,r22o,r26o,N};
+}
+/* ═══ SLUT PÅ KÄRNAN ═══ */
+
+/* ───────── färgsättning: kvantilklasser förankrade vid rikets nivå ───────── */
+const PALETT={
+  sekv:{neg:['#ffffff','#eaf5ee','#d3ecdd','#b9e0ca'],pos:['#8ecfa9','#5cb583','#2c9159','#00603A']},
+  safe:{neg:['#7A2A14','#C4501F','#FC6E4C','#FAD4CC'],pos:['#DFA7F9','#B565D8','#7D17A3','#40085A']},
+  rodgron:{neg:['#660027','#AD143D','#ED1B34','#FAD4CC'],pos:['#A0D7BA','#4DAF7C','#009352','#00603A']}
+  
+};
+const sparr=()=>STATE.niva==='kommun'?DATA.meta.sparr_kommun:DATA.meta.sparr_kluster;
+function graa(d){
+  if(STATE.matt==='per22') return d.r22<sparr();
+  if(STATE.matt==='per26') return d.r26<sparr();
+  return d.r22<sparr()||d.r26<sparr();
+}
+const varde=d=>STATE.matt==='for'?d.pct:STATE.matt==='per26'?d.per26:d.per22;
+function ankare(){
+  const N=ROWS.N;
+  if(STATE.matt==='for'){
+    const a=kum(DATA.riket.r22o,N);
+    return a>0?(ROWS.r26o/a)*VALJARRIKET-1:0;
+  }
+  if(STATE.matt==='per26')
+    return R.dag.slice(0,N).reduce((a,b)=>a+b,0)/DATA.meta.rostber_2026_riket;
+  return kum(DATA.riket.r22,N)/DATA.meta.rostber_2022_riket;
+}
+let SKALA=null;
+function byggSkala(){
+  const niva=STATE.niva==='ingen'?'kluster':STATE.niva;
+  const v=ROWS[niva].filter(d=>!graa(d)&&varde(d)!=null&&isFinite(varde(d))).map(varde).sort((a,b)=>a-b);
+  const a=ankare(), under=v.filter(x=>x<a), over=v.filter(x=>x>=a);
+  const q=(arr,p)=>arr.length?arr[Math.min(arr.length-1,Math.max(0,Math.round(p*(arr.length-1))))]:a;
+  const gr=[q(under,.25),q(under,.5),q(under,.75),a,q(over,.25),q(over,.5),q(over,.75)];
+  for(let i=1;i<gr.length;i++) if(gr[i]<=gr[i-1]) gr[i]=gr[i-1]+1e-9;
+  const p=PALETT[STATE.palett];
+  SKALA={granser:gr,farger:p.neg.concat(p.pos),ankare:a,antalUnder:under.length,antalOver:over.length};
+}
+function farg(d){
+  if(graa(d)) return '#b9adaa';
+  const v=varde(d); if(v==null||!isFinite(v)) return '#b9adaa';
+  let i=0; while(i<SKALA.granser.length&&v>=SKALA.granser[i]) i++;
+  return SKALA.farger[i];
+}
+function synlig(d){
+  if(STATE.lagt&&!(d.al>DATA.meta.trosk_lagt)) return false;
+  if(STATE.sok){const s=STATE.sok.toLowerCase();
+    if(!((d.namn||'').toLowerCase().includes(s)||(d.kommun||'').toLowerCase().includes(s))) return false;}
+  return true;
+}
+const fmtV=v=>STATE.matt==='for'?pct(v):andel(v);
+
+/* ───────── kartan ───────── */
+function stjarnbild(){
+  const s=34, c=document.createElement('canvas'); c.width=c.height=s;
+  const x=c.getContext('2d'); x.translate(s/2,s/2);
+  x.beginPath();
+  for(let i=0;i<10;i++){
+    const r=i%2?s*0.17:s*0.42, a=-Math.PI/2+i*Math.PI/5;
+    i?x.lineTo(Math.cos(a)*r,Math.sin(a)*r):x.moveTo(Math.cos(a)*r,Math.sin(a)*r);
+  }
+  x.closePath(); x.fillStyle='#fff'; x.fill();
+  x.strokeStyle='#3D0019'; x.lineWidth=1.4; x.stroke();
+  return {width:s,height:s,data:new Uint8Array(x.getImageData(0,0,s,s).data)};
+}
+function skapaKarta(){
+  KARTA=new maplibregl.Map({
+    container:'karta',
+    style:{version:8,sources:{osm:{type:'raster',
+        tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,maxzoom:19,
+        attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}},
+      layers:[{id:'osm',type:'raster',source:'osm', paint: {
+        'raster-saturation': -1,
+        'raster-contrast': -0.1,
+        'raster-brightness-min': 0.15,
+        'raster-brightness-max': 0.95
+      }}]},
+    center:[15.5,62.5], zoom:4, minZoom:3, maxZoom:16, attributionControl:false});
+  KARTA.addControl(new maplibregl.AttributionControl({compact:true}));
+  KARTA.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+  KARTA.addControl(new maplibregl.FullscreenControl(),'top-right');
+  KARTA.addControl(new maplibregl.ScaleControl({unit:'metric'}),'bottom-left');
+  KARTA.on('load',()=>{
+    KARTA.addImage('stjarna',stjarnbild());
+    KARTA.addSource('vdraster',{type:'image',url:VDPNG,coordinates:VDMETA.horn});
+    KARTA.addLayer({id:'vdraster',type:'raster',source:'vdraster',
+      paint:{'raster-opacity':0.55,'raster-resampling':'nearest'},layout:{visibility:'none'}});
+    for(const n of ['kluster','kommun']){
+      KARTA.addSource(n,{type:'geojson',data:GEO[n],promoteId:n==='kluster'?'KLUSTER':'KOMMUNKOD'});
+      KARTA.addLayer({id:n+'-fyll',type:'fill',source:n,
+        paint:{'fill-color':'#cccccc','fill-opacity':0.4}});
+      KARTA.addLayer({id:n+'-kant',type:'line',source:n,
+        paint:{'line-color':'#3D0019','line-width':['case',['boolean',['feature-state','vald'],false],2.6,0.4],
+               'line-opacity':0.55}});
+    }
+    KARTA.addSource('l26',{type:'geojson',data:GEO.l26});
+    KARTA.addLayer({id:'l26',type:'symbol',source:'l26',
+      layout:{'icon-image':'stjarna','icon-size':['interpolate',['linear'],['zoom'],4,0.3,10,0.62,14,0.9],
+              'icon-allow-overlap':true,visibility:'none'}});
+    KARTA.addSource('l22',{type:'geojson',data:GEO.l22});
+    KARTA.addLayer({id:'l22',type:'circle',source:'l22',
+      paint:{'circle-radius':['interpolate',['linear'],['zoom'],4,2,10,4.5,14,7],
+             'circle-color':'#000','circle-stroke-color':'#fff','circle-stroke-width':0.8},
+      layout:{visibility:'none'}});
+    for(const n of ['kluster','kommun']){
+      KARTA.on('click',n+'-fyll',e=>{
+        if(!e.features.length) return;
+        const p=e.features[0].properties;
+        STATE.sel=n==='kluster'?p.KLUSTER:p.KOMMUNKOD;
+        ritaDetalj(); markera(); ritaStaplar(); ritaLinje(); ritaPrognos();});
+      KARTA.on('mouseenter',n+'-fyll',()=>KARTA.getCanvas().style.cursor='pointer');
+      KARTA.on('mouseleave',n+'-fyll',()=>KARTA.getCanvas().style.cursor='');
+    }
+    const pop=new maplibregl.Popup({closeButton:false,closeOnClick:false});
+    for(const par of [['l22',f=>'2022: '+f.n],['l26',f=>'2026: '+f.n]]){
+      KARTA.on('mouseenter',par[0],e=>{KARTA.getCanvas().style.cursor='pointer';
+        pop.setLngLat(e.features[0].geometry.coordinates)
+           .setHTML('<b>'+esc(par[1](e.features[0].properties))+'</b><br>'+esc(e.features[0].properties.k)).addTo(KARTA);});
+      KARTA.on('mouseleave',par[0],()=>{KARTA.getCanvas().style.cursor='';pop.remove();});
+    }
+    KLAR=true; malaKarta();
+  });
+}
+let SENAST_VALD=null;
+function markera(){
+  if(!KARTA||!KLAR) return;
+  for(const n of ['kluster','kommun']){
+    if(SENAST_VALD) try{KARTA.setFeatureState({source:n,id:SENAST_VALD},{vald:false});}catch(e){}
+    if(STATE.sel) try{KARTA.setFeatureState({source:n,id:STATE.sel},{vald:true});}catch(e){}
+  }
+  SENAST_VALD=STATE.sel;
+}
+function malaKarta(){
+  if(!KARTA||!KLAR) return;
+  byggSkala();
+  const aktiv=STATE.niva==='ingen'?null:STATE.niva;
+  for(const n of ['kluster','kommun']){
+    const pa=n===aktiv;
+    KARTA.setLayoutProperty(n+'-fyll','visibility',pa?'visible':'none');
+    KARTA.setLayoutProperty(n+'-kant','visibility',pa?'visible':'none');
+    if(!pa) continue;
+    const nyckel=n==='kluster'?'KLUSTER':'KOMMUNKOD';
+    const uttryck=['match',['get',nyckel]], synl=['match',['get',nyckel]];
+    for(const d of ROWS[n]){ uttryck.push(d.id,farg(d)); synl.push(d.id,synlig(d)?0.4:0.05); }
+    uttryck.push('#b9adaa'); synl.push(0.05);
+    KARTA.setPaintProperty(n+'-fyll','fill-color',uttryck);
+    KARTA.setPaintProperty(n+'-fyll','fill-opacity',synl);
+  }
+  KARTA.setLayoutProperty('vdraster','visibility',STATE.lg_vd?'visible':'none');
+  KARTA.setLayoutProperty('l22','visibility',STATE.lg_l22?'visible':'none');
+  KARTA.setLayoutProperty('l26','visibility',STATE.lg_l26?'visible':'none');
+  markera(); ritaLegend();
+}
+function ritaLegend(){
+  const L=document.getElementById('legend');
+  if(STATE.niva==='ingen'){L.innerHTML='Områdeslagret är avstängt.';}
+  else{
+    const g=SKALA.granser, f=SKALA.farger;
+    let h='<span class="sw" style="background:'+f[0]+'"></span>under '+fmtV(g[0]);
+    for(let i=1;i<f.length-1;i++)
+      h+=' <span class="sw" style="background:'+f[i]+'"'+(i===4?' title="rikets nivå"':'')+'></span>'+
+         (i===4?'<b>'+fmtV(g[3])+'</b> ':'')+fmtV(g[i]);
+    h+=' <span class="sw" style="background:'+f[f.length-1]+'"></span>över '+fmtV(g[g.length-1]);
+    h+=' <span class="sw" style="background:#b9adaa"></span>för få röster';
+    L.innerHTML=h
+    //' | fet gräns = rikets nivå ('+SKALA.antalUnder+' områden under, '+SKALA.antalOver+' över)';
+  }
+  const L2=document.getElementById('legend2'); const bit=[];
+  if(STATE.lg_vd) bit.push(VDMETA.farg.map((c,i)=>'<span class="sw" style="background:'+c+'"></span>'+
+      (i===0?'under 60':i===7?'över 90':Math.round(VDMETA.steg[i]*100))).join(' ')+' | valdeltagande 2022, procent');
+  if(STATE.lg_l22) bit.push('<span style="display:inline-block;width:11px;height:11px;border-radius:50%;'+
+      'background:#000;border:1.5px solid #fff;vertical-align:middle"></span> röstningslokal 2022');
+  if(STATE.lg_l26) bit.push('<span style="color:#3D0019">★</span> röstningslokal 2026');
+  L2.innerHTML=bit.join(' &nbsp;&nbsp; ');
+}
+
+/* ───────── vald serie: markerat område eller riket ───────── */
+function vald(){
+  const niva=STATE.niva==='ingen'?'kluster':STATE.niva;
+  return STATE.sel?ROWS[niva].find(x=>x.id===STATE.sel)||null:null;
+}
+function serier(){
+  const d=vald();
+  if(d) return {s22:d.s22,s26:d.s26,titel:d.namn+(STATE.niva==='kluster'&&d.kommun?' | '+d.kommun:''),rad:d};
+  return {s22:DATA.riket.r22,s26:R.dag,titel:'Riket',rad:null};
+}
+
+/* ───────── diagram ───────── */
+function ritaStaplar(){
+  if(!document.getElementById('stapel')) return;
+  const N=ROWS.N, se=serier(), W=560, H=215, m={t:10,r:10,b:28,l:54};
+  const rub=document.getElementById('diagramrubrik'); if(rub) rub.textContent='Utvecklingen dag för dag - '+se.titel;
+  const mx=Math.max(Math.max.apply(null,se.s22.slice(0,N)),Math.max.apply(null,se.s26.slice(0,N)),1);
+  const bw=(W-m.l-m.r)/N, bar=Math.max(3,Math.min(14,bw/2-1.5));
+  const y=v=>H-m.b-(v/mx)*(H-m.t-m.b);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  for(let i=0;i<=4;i++){const v=mx*i/4;
+    s+='<line x1="'+m.l+'" y1="'+y(v)+'" x2="'+(W-m.r)+'" y2="'+y(v)+'" stroke="#e6d5cc"/>'+
+       '<text x="'+(m.l-6)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="9" fill="#8a6c74">'+F.format(Math.round(v))+'</text>';}
+  for(let d=0;d<N;d++){
+    const x=m.l+d*bw+bw/2, sen=d===R.aktuell-1, a=se.s22[d]||0, b=se.s26[d]||0;
+    s+='<rect x="'+(x-bar-1)+'" y="'+y(a)+'" width="'+bar+'" height="'+(H-m.b-y(a))+'" fill="#cfc3bd">'+
+       '<title>Dag '+(d+1)+' 2022: '+F.format(a)+'</title></rect>'+
+       '<rect x="'+(x+1)+'" y="'+y(b)+'" width="'+bar+'" height="'+(H-m.b-y(b))+'" fill="#ED1B34" opacity="'+(sen?.5:1)+'">'+
+       '<title>Dag '+(d+1)+' 2026: '+F.format(b)+'</title></rect>'+
+       '<text x="'+x+'" y="'+(H-m.b+13)+'" text-anchor="middle" font-size="9" fill="#8a6c74">'+(d+1)+'</text>';
+  }
+  document.getElementById('stapel').innerHTML=s+'</svg>';
+  document.getElementById('stapeltag').innerHTML=
+    '<span class="sw" style="background:#cfc3bd"></span> 2022 &nbsp; <span class="sw" style="background:#ED1B34"></span> 2026'+
+    //' | staplarna står bredvid varandra per dag'+
+    (N>=R.aktuell?' | dag '+R.aktuell+' är blekare eftersom rapporteringen släpar 1-2 dygn':'');
+}
+function ritaLinje(){
+  if(!document.getElementById('linje')) return;
+  const N=ROWS.N, se=serier(), W=560, H=215, m={t:12,r:12,b:28,l:60};
+  const c22=[],c26=[]; let a=0,b=0;
+  for(let d=0;d<19;d++){a+=se.s22[d]||0; c22.push(a); if(d<N){b+=se.s26[d]||0; c26.push(b);}}
+  // prognos: nuläget skalat med 2022 års kurva
+  const hela22=a, pk=[];
+  if(hela22>0&&b>0){
+    const kv=c22[N-1]/hela22;
+    if(kv>0.02) for(let d=N-1;d<19;d++) pk.push({d:d,v:b*(c22[d]/hela22)/kv});
+  }
+  const mx=Math.max(a,b,pk.length?pk[pk.length-1].v:0)||1;
+  const X=d=>m.l+(d/18)*(W-m.l-m.r), Y=v=>H-m.b-(v/mx)*(H-m.t-m.b);
+  const lin=arr=>arr.map((v,d)=>X(d).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+  let s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  for(let i=0;i<=4;i++){const v=mx*i/4;
+    s+='<line x1="'+m.l+'" y1="'+Y(v)+'" x2="'+(W-m.r)+'" y2="'+Y(v)+'" stroke="#e6d5cc"/>'+
+       '<text x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="9" fill="#8a6c74">'+F.format(Math.round(v))+'</text>';}
+  s+='<line x1="'+X(N-1)+'" y1="'+m.t+'" x2="'+X(N-1)+'" y2="'+(H-m.b)+'" stroke="#b9adaa" stroke-dasharray="2 3"/>';
+  s+='<polyline points="'+lin(c22)+'" fill="none" stroke="#8a6c74" stroke-width="2" stroke-dasharray="5 4"/>';
+  if(pk.length) s+='<polyline points="'+pk.map(p=>X(p.d).toFixed(1)+','+Y(p.v).toFixed(1)).join(' ')+
+     '" fill="none" stroke="#ED1B34" stroke-width="2" stroke-dasharray="2 3" opacity=".75"/>';
+  s+='<polyline points="'+lin(c26)+'" fill="none" stroke="#ED1B34" stroke-width="2.5"/>';
+  for(let d=0;d<N;d++)
+    s+='<circle cx="'+X(d)+'" cy="'+Y(c26[d])+'" r="3" fill="#ED1B34"><title>Dag '+(d+1)+
+       ' 2026: '+F.format(c26[d])+' (2022: '+F.format(c22[d])+')</title></circle>';
+  for(let d=0;d<19;d+=3) s+='<text x="'+X(d)+'" y="'+(H-m.b+13)+'" text-anchor="middle" font-size="9" fill="#8a6c74">'+(d+1)+'</text>';
+  s+='<text x="'+X(18)+'" y="'+(H-m.b+13)+'" text-anchor="middle" font-size="9" fill="#8a6c74">19</text>';
+  document.getElementById('linje').innerHTML=s+'</svg>';
+}
+
+/* ───────── prognos ───────── */
+function prognosKort(d,rubrik,extra){
+  if(!d||d.pred==null) return '<div class="card"><h3>'+esc(rubrik)+'</h3>'+
+    '<p style="margin:0;color:var(--mut);font-size:13px">Underlaget räcker inte för en prognos.</p></div>';
+  const nadd=d.predPct>=d.vd;
+  const kvar=d.predPct/(d.vd||1);
+  const dom = nadd
+    ? 'Förtidsrösterna ensamma skulle nå över hela valdeltagandet 2022. Om prognosen håller stiger det totala valdeltagandet med säkerhet.'
+    : kvar>=0.9 ? 'Förtidsrösterna ensamma skulle nå nästan hela 2022 års valdeltagande. Mycket lite valdagsröstande skulle räcka för att totalen ska öka.'
+    : kvar>=0.75 ? 'Förtidsrösterna skulle motsvara en stor del av 2022 års valdeltagande, men beskedet om totalen beror på valdagen.'
+    : 'Prognosen säger inget starkt om det totala valdeltagandet.';
+  return '<div class="card"><h3>'+esc(rubrik)+'</h3>'+
+    '<div class="big">'+num(d.pred)+' röster</div>'+
+    '<div style="color:var(--mut);font-size:13px;margin-bottom:9px">motsvarar '+andel(d.predPct)+
+      ' av de röstberättigade 2026</div>'+
+    '<dl class="kv">'+
+      '<dt>Förtidsröster hittills (dag '+ROWS.N+')</dt><dd>'+num(d.r26)+'</dd>'+
+      '<dt>Andel av perioden som passerat 2022</dt><dd>'+andel(d.kurva)+'</dd>'+
+      '<dt>Förtidsröster hela perioden 2022</dt><dd>'+num(d.hela22)+'</dd>'+
+      '<dt>Motsvarande andel av rb 2022</dt><dd>'+andel(d.rb22>0?d.hela22/d.rb22:null)+'</dd>'+
+      '<dt>Totalt valdeltagande KF 2022</dt><dd>'+andel(d.vd)+'</dd>'+
+      '<dt>Prognos mot 2022 års valdeltagande</dt><dd>'+(d.marginal==null?'-':
+        (d.marginal>=0?'+':'')+F1.format(d.marginal*100)+' pe')+'</dd>'+
+    '</dl>'+
+    '<div class="dom">'+dom+'</div>'+(extra||'')+
+    '<div class="tag">'+(d.egenKurva?'Områdets egen kurva från 2022 används.':
+      'Områdets egen 2022-kurva är för tunn, rikets kurva används i stället.')+'</div></div>';
+}
+function ritaPrognos(){
+  const ruta=document.getElementById('prognos');
+  if(!ruta) return;   // avsnittet är bortkommenterat i html:en
+  const N=ROWS.N;
+  const r26=R.dag.slice(0,N).reduce((a,b)=>a+b,0), hela22=summa(DATA.riket.r22);
+  const kv=kum(DATA.riket.r22,N)/hela22;
+  const pred=kv>0?r26/kv:null, predPct=pred!=null?pred/DATA.meta.rostber_2026_riket:null;
+  const riket={pred:pred,predPct:predPct,r26:r26,kurva:kv,hela22:hela22,
+    rb22:DATA.meta.rostber_2022_riket,rb26:DATA.meta.rostber_2026_riket,
+    vd:DATA.meta.valdeltagande_2022_riket,egenKurva:true,
+    marginal:predPct!=null?predPct-DATA.meta.valdeltagande_2022_riket:null};
+  const d=vald();
+  ruta.innerHTML='<div class="two">'+
+    prognosKort(riket,'Riket',
+      '<div class="tag">Antalet 2022 blev '+num(hela22)+' förtidsröster, alltså '+
+      andel(hela22/DATA.meta.rostber_2022_riket)+' av de röstberättigade.</div>')+
+    (d?prognosKort(d,d.namn+(STATE.niva==='kluster'&&d.kommun?' | '+d.kommun:''),''):
+      '<div class="card"><h3>Valt område</h3><p style="margin:0;color:var(--mut);font-size:13px">'+
+      'Klicka på ett område i kartan för att se dess prognos.</p></div>')+
+    '</div>'+
+    '<div class="meth" style="margin-top:14px"><b>Så räknas prognosen.</b> Antalet röster hittills delas '+
+      'med hur stor andel av hela perioden som hade passerat vid samma dagnummer 2022. Den vilar alltså på '+
+      'antagandet att röstandet fördelar sig över dagarna som 2022. Det antagandet är osäkert: 2026 ligger '+
+      'långt före i tid, vilket kan betyda både fler röster totalt och att fler röstar tidigt. Behandla '+
+      'prognosen som en riktning, inte som ett tal.<br><br>'+
+      '<b>Testet mot valdeltagandet</b> jämför prognosen med hela valdeltagandet i kommunfullmäktigevalet '+
+      '2022, inte bara med förtidsrösterna. Går prognosen över den nivån räcker förtidsrösterna ensamma för '+
+      'att slå 2022 års totala antal röstande, och då måste valdeltagandet öka oavsett vad som händer på '+
+      'valdagen.</div>';
+}
+
+function ritaRiks(){
+  const N=ROWS.N, r22=kum(DATA.riket.r22,N), r26=R.dag.slice(0,N).reduce((a,b)=>a+b,0);
+  document.getElementById('riks').innerHTML=
+    '<h3>Riket, till och med dag '+N+'</h3>'+
+    '<div class="big">' +
+      sgn(r26 - r22) + ' röster (' + pct(r22 > 0 ? r26 / r22 - 1 : null) + ')' +
+    '</div>' +
+    '<div style="color:var(--mut);font-size:13px;margin-bottom:9px">' +
+      'mot samma tidpunkt 2022</div>' +
+    '<dl class="kv">' +
+      '<dt>Mottagna 2026</dt><dd>'+num(r26)+'</dd>'+
+      '<dt>Mottagna 2022, samma dagnummer</dt><dd>'+num(r22)+'</dd>'+
+      '<dt>Andel av röstberättigade 2026</dt><dd>'+andel(r26/DATA.meta.rostber_2026_riket)+'</dd>'+
+      '<dt>Andel av röstberättigade 2022</dt><dd>'+andel(r22/DATA.meta.rostber_2022_riket)+'</dd>'+
+    '</dl>'+(N>R.aktuell?'<div class="warn">Dag '+N+' ligger efter den senaste dag som har data '+
+      '(dag '+R.aktuell+'). Dagarna däremellan räknas som noll för 2026.</div>':
+      (N<=2?'<div class="warn">Så här tidigt i perioden är talen små och svänger kraftigt.</div>':''));
+}
+function ritaDetalj(){
+  const el=document.getElementById('detalj'), niva=STATE.niva==='ingen'?'kluster':STATE.niva;
+  const d=vald();
+  if(!d){el.innerHTML='<h3>Välj ett område</h3><p style="color:var(--mut);font-size:13px;margin:0">'+
+    'Klicka på kartan för att se detaljer.</p>'; return;}
+  el.innerHTML='<h3>'+esc(d.namn)+' <span style="font-weight:400;color:var(--mut)">'+
+      (niva==='kluster'?'| '+esc(d.kommun):'')+'</span></h3>'+
+    '<div style="margin-bottom:9px"><span class="pill '+d.betyg+'">Betyg '+d.betyg+'</span>'+
+      (d.al>DATA.meta.trosk_lagt?'<span class="pill flag" style="margin-left:6px">Lågt valdeltagande 2022</span>':'')+
+      (graa(d)?'<span class="pill" style="background:#b9adaa;color:#fff;margin-left:6px">För få röster</span>':'')+
+    '</div><dl class="kv">'+
+      '<dt>Röster 2026 t.o.m. dag '+ROWS.N+'</dt><dd>'+num(d.r26)+'</dd>'+
+      '<dt>Röster 2022, samma tid</dt><dd>'+num(d.r22)+'</dd>'+
+      '<dt>Förändring</dt><dd>'+sgn(d.d)+' ('+pct(d.pct)+')</dd>'+
+      '<dt>Röster per rb 2026</dt><dd>'+andel(d.per26)+'</dd>'+
+      '<dt>Röster per rb 2022</dt><dd>'+andel(d.per22)+'</dd>'+
+      '<dt>Röstningslokaler 2022 / 2026</dt><dd>'+d.l22+' / '+d.l26+'</dd>'+
+      (niva==='kluster'?'<dt>Öppettimmar 2022 / 2026</dt><dd>'+F1.format(d.h22)+' / '+F1.format(d.h26)+'</dd>':'')+
+      '<dt>Röstberättigade 2022 / 2026</dt><dd>'+num(d.rb22)+' / '+num(d.rb26)+'</dd>'+
+      '<dt>Skattat valdeltagande KF 2022</dt><dd>'+andel(d.vd)+'</dd>'+
+      //'<dt>Andel i valdistrikt under 70 %</dt><dd>'+andel(d.al)+'</dd>'+
+      //'<dt>'+(niva==='kluster'?'RegSO i klustret':'Kluster i kommunen')+'</dt><dd>'+d.nr+'</dd>'+
+    '</dl>'+(niva==='kluster'?'<div style="font-size:12px;color:var(--mut);margin-top:9px">'+esc(d.regso)+'</div>':'');
+}
+
+/* ───────── dagreglaget ───────── */
+function standarddag(){
+  const nu=new Date(), h=nu.getHours();
+  const d=new Date(nu.getFullYear(),nu.getMonth(),nu.getDate());
+  if(!(h>=6&&h<14)) d.setDate(d.getDate()-1);          // efter 14 och före 06: gårdagen
+  const p=n=>String(n).padStart(2,'0');
+  const iso=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  let i=1;
+  DATA.meta.datum_2026.forEach((x,k)=>{ if(String(x).slice(0,10)<=iso) i=k+1; });
+  return Math.max(1,Math.min(i,R.aktuell));
+}
+function dagtext(){
+  const N=ROWS.N;
+  document.getElementById('dagtext').innerHTML='<b>Dag '+N+' av 19</b> | '+
+    esc(String(DATA.meta.datum_2026[N-1]).slice(0,10))+' mot '+esc(String(DATA.meta.datum_2022[N-1]).slice(0,10))+
+    ' ('+esc(DATA.meta.veckodag[N-1])+')'+(N>R.aktuell?' | <span style="color:#8a5a00">saknar data</span>':'');
+}
+function rita(){
+  malaKarta(); ritaRiks(); ritaDetalj(); dagtext();
+  ritaStaplar(); ritaLinje(); ritaPrognos();
+}
+function sattDag(N){
+  STATE.dag=N; bygg(N); document.getElementById('dag').value=N; rita();
+}
+function zoomaTillSok(){
+  if(!KARTA||!STATE.sok) return;
+  const niva=STATE.niva==='ingen'?'kluster':STATE.niva;
+  const tra=ROWS[niva].filter(synlig); if(!tra.length||tra.length>40) return;
+  const id=new Set(tra.map(d=>d.id));
+  let x0=180,y0=90,x1=-180,y1=-90,funnet=false;
+  const ga=c=>{if(typeof c[0]==='number'){x0=Math.min(x0,c[0]);x1=Math.max(x1,c[0]);
+    y0=Math.min(y0,c[1]);y1=Math.max(y1,c[1]);}else c.forEach(ga);};
+  GEO[niva].features.forEach(f=>{
+    const k=f.properties.KLUSTER||f.properties.KOMMUNKOD;
+    if(id.has(k)){ga(f.geometry.coordinates);funnet=true;}});
+  if(funnet) KARTA.fitBounds([[x0,y0],[x1,y1]],{padding:60,maxZoom:12,duration:600});
+}
+
+function start(){
+  R=parseRost();
+  bygg(R.aktuell);
+  const N=standarddag();
+  document.getElementById('subtitle').textContent=
+    //DATA.kluster.length+' kluster | '+
+    (SENAST&&SENAST.hamtad?'Senast uppdaterat '+SENAST.hamtad:'röstdata från medföljande ögonblicksbild')+
+    ' | senaste dag med siffror: '+R.aktuell;
+  const fd=document.getElementById('fotdatum');
+  if(fd) fd.textContent=(SENAST&&SENAST.hamtad?'Senast uppdaterat '+SENAST.hamtad+'. ':'');
+  try{ skapaKarta(); }
+  catch(ex){                       // t.ex. när WebGL saknas eller är avstängt
+    KARTA=null;
+    document.getElementById('karta').innerHTML=
+      '<div style="padding:38px 30px;font-size:13.5px;line-height:1.6;color:var(--mut)">'+
+      '<b style="color:var(--fg)">Kartan kunde inte startas.</b><br>Webbläsaren saknar WebGL, '+
+      'eller så är maskinvaruacceleration avstängd. Allt annat på sidan fungerar. I Chrome hittar '+
+      'du inställningen under Inställningar, System, Använd grafikacceleration när det är tillgängligt.</div>';
+  }
+  ['niva','matt','palett'].forEach(id=>{
+    document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
+      document.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed','false'));
+      b.setAttribute('aria-pressed','true');
+      STATE[id]=b.dataset.v;
+      if(id==='niva') STATE.sel=null;
+      rita();});});
+  ['lg_vd','lg_l22','lg_l26'].forEach(k=>{
+    document.getElementById(k).onchange=e=>{STATE[k]=e.target.checked;malaKarta();};});
+  document.getElementById('lagt').onclick=e=>{
+    STATE.lagt=!STATE.lagt; e.target.setAttribute('aria-pressed',STATE.lagt); malaKarta();};
+  document.getElementById('sok').oninput=e=>{
+    STATE.sok=e.target.value.trim(); malaKarta();
+    clearTimeout(window._sokt); window._sokt=setTimeout(zoomaTillSok,500);};
+  const sl=document.getElementById('dag');
+  sl.oninput=e=>sattDag(parseInt(e.target.value,10));
+  sattDag(N);
+}
+</script>
+</body>
+</html>

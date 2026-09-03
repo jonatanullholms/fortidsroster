@@ -1,0 +1,9 @@
+# Klartextversionerna får aldrig hamna i arkivet. Bara .enc-filerna publiceras.
+klusterdata.json
+rostdata.csv
+geo_kluster.topojson
+geo_kommun.topojson
+lokaler_2022.geojson
+lokaler_2026.geojson
+valdeltagande_2022.json
+valdeltagande_2022.png
