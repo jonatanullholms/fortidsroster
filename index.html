@@ -66,8 +66,8 @@ label.chk input{accent-color:var(--morkrod)}
 .maplibregl-ctrl-group{border-radius:0!important;box-shadow:none!important;border:1px solid var(--line)}
 .legend{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;color:var(--mut);flex-wrap:wrap}
 .sw{display:inline-block;width:22px;height:11px;border:1px solid rgba(0,0,0,.18);vertical-align:middle}
-.sw-graa{background:repeating-linear-gradient(45deg,#8f837c 0 3px,#4a413d 3px 5px)}
-.pill-graa{background:repeating-linear-gradient(45deg,#8f837c 0 4px,#4a413d 4px 6px);
+.sw-graa{background:repeating-linear-gradient(45deg,#e7dbd4 0 3px,#8f837c 3px 5px)}
+.pill-graa{background:repeating-linear-gradient(45deg,#e7dbd4 0 4px,#8f837c 4px 6px);
   border-color:#4a413d;color:#fff}
 .card{border:1px solid var(--line);border-top:3px solid var(--morkrod);padding:16px 18px 17px;
   background:var(--panel)}
@@ -489,8 +489,8 @@ function snedstreckbild(){
   // mönstret går ihop sömlöst när MapLibre kaklar det.
   const s=12, c=document.createElement('canvas'); c.width=c.height=s;
   const x=c.getContext('2d');
-  x.fillStyle='#8f837c'; x.fillRect(0,0,s,s);
-  x.strokeStyle='#4a413d'; x.lineWidth=2.4; x.lineCap='square';
+  x.fillStyle='#e7dbd4'; x.fillRect(0,0,s,s);
+  x.strokeStyle='#8f837c'; x.lineWidth=2.4; x.lineCap='square';
   for(const d of [-s,0,s]){ x.beginPath(); x.moveTo(d,s); x.lineTo(d+s,0); x.stroke(); }
   return {width:s,height:s,data:new Uint8Array(x.getImageData(0,0,s,s).data)};
 }
