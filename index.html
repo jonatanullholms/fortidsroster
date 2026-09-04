@@ -24,10 +24,11 @@ body{margin:0;font:15px/1.6 var(--sans);background:var(--papper);color:var(--fg)
 .masthead{background:var(--djuprod);color:#fff;border-bottom:5px solid var(--rod)}
 .masthead .inre{max-width:1320px;margin:0 auto;padding:15px 22px 14px;display:flex;
   align-items:center;gap:16px}
+.masthead .inre>div:last-child{min-width:0}
 .logga{height:46px;width:auto;display:block;flex:none}
 .masthead .strek{width:1px;align-self:stretch;background:rgba(255,255,255,.28);flex:none}
 h1{margin:0;font:600 21px/1.2 var(--serif);letter-spacing:.005em}
-.sub{color:#d9c2ca;font-size:12px;margin-top:4px;letter-spacing:.02em}
+.sub{color:#d9c2ca;font-size:12px;margin-top:4px;letter-spacing:.02em;overflow-wrap:anywhere}
 .wrap{max-width:1320px;margin:0 auto;padding:0 22px 70px}
 /* ── formulär ── */
 input[type=search],input[type=password]{width:100%;padding:9px 11px;border:1px solid var(--line);
@@ -40,19 +41,20 @@ button[aria-pressed=true]{background:var(--morkrod);color:#fff;border-color:var(
 /* ── kontroller ── */
 .ctl{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end;padding:18px 0 15px;
   border-bottom:1px solid var(--line)}
-.grp{display:flex;flex-direction:column;gap:6px}
+.grp{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%}
 .grp>span{font:600 10px/1 var(--sans);text-transform:uppercase;letter-spacing:.11em;color:var(--mut)}
-.seg{display:flex}
-.seg button{margin-left:-1px}
+.seg{display:flex;min-width:0}
+.seg button{margin-left:-1px;min-width:0}
 .seg button:first-child{margin-left:0}
 label.chk{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap}
 label.chk input{accent-color:var(--morkrod)}
 /* ── dagreglage ── */
-.dagrad{display:flex;align-items:center;gap:16px;padding:15px 0 6px;border-bottom:1px solid var(--hairline)}
+.dagrad{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:15px 0 8px;
+  border-bottom:1px solid var(--hairline)}
 .dagrad>span:first-child{font:600 10px/1 var(--sans);text-transform:uppercase;letter-spacing:.11em;
   color:var(--mut);flex:none}
-.dagrad input[type=range]{flex:1;min-width:220px;accent-color:var(--rod)}
-.dagtext{font-size:13px;min-width:280px;font-variant-numeric:tabular-nums;color:var(--mut)}
+.dagrad input[type=range]{flex:1 1 240px;min-width:0;accent-color:var(--rod)}
+.dagtext{font-size:13px;flex:1 1 250px;min-width:0;font-variant-numeric:tabular-nums;color:var(--mut)}
 .dagtext b{color:var(--fg);font-weight:600}
 /* ── ytor ── */
 .lay{display:grid;grid-template-columns:1.35fr .85fr;gap:26px;margin-top:20px}
@@ -64,12 +66,15 @@ label.chk input{accent-color:var(--morkrod)}
 .maplibregl-ctrl-group{border-radius:0!important;box-shadow:none!important;border:1px solid var(--line)}
 .legend{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;color:var(--mut);flex-wrap:wrap}
 .sw{display:inline-block;width:22px;height:11px;border:1px solid rgba(0,0,0,.18);vertical-align:middle}
+.sw-graa{background:repeating-linear-gradient(45deg,#8f837c 0 3px,#4a413d 3px 5px)}
+.pill-graa{background:repeating-linear-gradient(45deg,#8f837c 0 4px,#4a413d 4px 6px);
+  border-color:#4a413d;color:#fff}
 .card{border:1px solid var(--line);border-top:3px solid var(--morkrod);padding:16px 18px 17px;
   background:var(--panel)}
 .card h3{margin:0 0 11px;font:600 16px/1.25 var(--serif);color:var(--morkrod)}
 .kv{display:grid;grid-template-columns:1fr auto;gap:0 14px;font-size:13.5px;margin:0}
-.kv dt{color:var(--mut);padding:4px 0;border-top:1px solid var(--hairline)}
-.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;padding:4px 0;
+.kv dt{color:var(--mut);padding:4px 0;border-top:1px solid var(--hairline);overflow-wrap:anywhere}
+.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding:4px 0;
   border-top:1px solid var(--hairline);font-weight:500}
 .kv dt:first-of-type,.kv dd:first-of-type{border-top:none}
 .big {
@@ -119,6 +124,40 @@ h2.sec::before{content:"";width:9px;height:9px;background:var(--rod);flex:none}
 .fel{color:var(--mellanrod);font-size:12.5px;margin-top:11px;min-height:18px;line-height:1.5}
 #laddar{padding:16vh 22px;text-align:center;color:var(--mut);font-size:13px}
 .hide{display:none!important}
+@media(max-width:700px){
+  body{font-size:14.5px;overflow-x:hidden}
+  .wrap{padding:0 14px 46px}
+  .masthead .inre{padding:12px 14px 11px;gap:11px}
+  .logga{height:36px}
+  h1{font-size:16px;line-height:1.25}
+  .sub{font-size:11px;margin-top:3px}
+  .ctl{gap:13px;padding:14px 0 12px}
+  .grp{width:100%}
+  .ctl{max-width:100%}
+  .seg{flex-wrap:wrap}
+  .seg button{flex:1 1 44%;min-width:0;padding:8px 6px;font-size:10.5px;letter-spacing:.02em;
+    white-space:normal;overflow-wrap:anywhere}
+  #lagt{white-space:normal}
+  label.chk{font-size:12.5px}
+  .dagrad{gap:8px;padding:13px 0 10px}
+  .dagrad>span:first-child{width:100%}
+  .dagrad input[type=range]{flex:1 1 100%}
+  .dagtext{flex:1 1 100%;font-size:12.5px;line-height:1.45}
+  .lay{gap:18px;margin-top:16px}
+  #karta{height:62vh;min-height:330px}
+  .card{padding:13px 14px 14px}
+  .card h3{font-size:15px}
+  .big{font-size:26px}
+  .kv{font-size:12.5px;gap:0 10px}
+  h2.sec{font-size:16px;margin-top:28px}
+  .two{gap:16px;margin-top:14px}
+  .legend{font-size:11.5px;gap:6px;margin-top:8px}
+  .meth{font-size:12.5px;margin-top:20px}
+  .fot{flex-direction:column;gap:6px}
+  .grindkort{max-width:100%}
+  .grindkropp{padding:18px 18px 20px}
+  .grindkropp h2{font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -445,6 +484,16 @@ function synlig(d){
 const fmtV=v=>STATE.matt==='for'?pct(v):andel(v);
 
 /* ───────── kartan ───────── */
+function snedstreckbild(){
+  // 12x12-ruta med diagonala streck. Strecken ritas även utanför rutan så att
+  // mönstret går ihop sömlöst när MapLibre kaklar det.
+  const s=12, c=document.createElement('canvas'); c.width=c.height=s;
+  const x=c.getContext('2d');
+  x.fillStyle='#8f837c'; x.fillRect(0,0,s,s);
+  x.strokeStyle='#4a413d'; x.lineWidth=2.4; x.lineCap='square';
+  for(const d of [-s,0,s]){ x.beginPath(); x.moveTo(d,s); x.lineTo(d+s,0); x.stroke(); }
+  return {width:s,height:s,data:new Uint8Array(x.getImageData(0,0,s,s).data)};
+}
 function stjarnbild(){
   const s=34, c=document.createElement('canvas'); c.width=c.height=s;
   const x=c.getContext('2d'); x.translate(s/2,s/2);
@@ -469,13 +518,18 @@ function skapaKarta(){
         'raster-brightness-min': 0.15,
         'raster-brightness-max': 0.95
       }}]},
-    center:[15.5,62.5], zoom:4, minZoom:3, maxZoom:16, attributionControl:false});
+    center:[15.5,62.5], zoom:4, minZoom:3, maxZoom:16, attributionControl:false,
+    cooperativeGestures:window.matchMedia('(max-width:700px)').matches,
+    locale:{'CooperativeGesturesHandler.MobileHelpText':'Använd två fingrar för att flytta kartan',
+            'CooperativeGesturesHandler.WindowsHelpText':'Använd Ctrl och rulla för att zooma kartan',
+            'CooperativeGesturesHandler.MacHelpText':'Använd ⌘ och rulla för att zooma kartan'}});
   KARTA.addControl(new maplibregl.AttributionControl({compact:true}));
   KARTA.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
   KARTA.addControl(new maplibregl.FullscreenControl(),'top-right');
   KARTA.addControl(new maplibregl.ScaleControl({unit:'metric'}),'bottom-left');
   KARTA.on('load',()=>{
     KARTA.addImage('stjarna',stjarnbild());
+    KARTA.addImage('snedstreck',snedstreckbild());
     KARTA.addSource('vdraster',{type:'image',url:VDPNG,coordinates:VDMETA.horn});
     KARTA.addLayer({id:'vdraster',type:'raster',source:'vdraster',
       paint:{'raster-opacity':0.55,'raster-resampling':'nearest'},layout:{visibility:'none'}});
@@ -483,6 +537,10 @@ function skapaKarta(){
       KARTA.addSource(n,{type:'geojson',data:GEO[n],promoteId:n==='kluster'?'KLUSTER':'KOMMUNKOD'});
       KARTA.addLayer({id:n+'-fyll',type:'fill',source:n,
         paint:{'fill-color':'#cccccc','fill-opacity':0.4}});
+      KARTA.addLayer({id:n+'-graa',type:'fill',source:n,
+        paint:{'fill-pattern':'snedstreck','fill-opacity':0.72},
+        filter:['in',['get',n==='kluster'?'KLUSTER':'KOMMUNKOD'],['literal',[]]],
+        layout:{visibility:'none'}});
       KARTA.addLayer({id:n+'-kant',type:'line',source:n,
         paint:{'line-color':'#3D0019','line-width':['case',['boolean',['feature-state','vald'],false],2.6,0.4],
                'line-opacity':0.55}});
@@ -497,13 +555,15 @@ function skapaKarta(){
              'circle-color':'#000','circle-stroke-color':'#fff','circle-stroke-width':0.8},
       layout:{visibility:'none'}});
     for(const n of ['kluster','kommun']){
-      KARTA.on('click',n+'-fyll',e=>{
+      for(const lg of [n+'-fyll',n+'-graa']){
+      KARTA.on('click',lg,e=>{
         if(!e.features.length) return;
         const p=e.features[0].properties;
         STATE.sel=n==='kluster'?p.KLUSTER:p.KOMMUNKOD;
         ritaDetalj(); markera(); ritaStaplar(); ritaLinje(); ritaPrognos();});
-      KARTA.on('mouseenter',n+'-fyll',()=>KARTA.getCanvas().style.cursor='pointer');
-      KARTA.on('mouseleave',n+'-fyll',()=>KARTA.getCanvas().style.cursor='');
+      KARTA.on('mouseenter',lg,()=>KARTA.getCanvas().style.cursor='pointer');
+      KARTA.on('mouseleave',lg,()=>KARTA.getCanvas().style.cursor='');
+      }
     }
     const pop=new maplibregl.Popup({closeButton:false,closeOnClick:false});
     for(const par of [['l22',f=>'2022: '+f.n],['l26',f=>'2026: '+f.n]]){
@@ -531,14 +591,21 @@ function malaKarta(){
   for(const n of ['kluster','kommun']){
     const pa=n===aktiv;
     KARTA.setLayoutProperty(n+'-fyll','visibility',pa?'visible':'none');
+    KARTA.setLayoutProperty(n+'-graa',  'visibility',pa?'visible':'none');
     KARTA.setLayoutProperty(n+'-kant','visibility',pa?'visible':'none');
     if(!pa) continue;
     const nyckel=n==='kluster'?'KLUSTER':'KOMMUNKOD';
-    const uttryck=['match',['get',nyckel]], synl=['match',['get',nyckel]];
-    for(const d of ROWS[n]){ uttryck.push(d.id,farg(d)); synl.push(d.id,synlig(d)?0.4:0.05); }
+    const uttryck=['match',['get',nyckel]], synl=['match',['get',nyckel]], strecka=[];
+    for(const d of ROWS[n]){
+      const g=graa(d), v=synlig(d);
+      if(g&&v) strecka.push(d.id);
+      uttryck.push(d.id,farg(d));
+      synl.push(d.id, g&&v ? 0 : (v?0.4:0.05));   // streckmönstret ritas i eget lager
+    }
     uttryck.push('#b9adaa'); synl.push(0.05);
     KARTA.setPaintProperty(n+'-fyll','fill-color',uttryck);
     KARTA.setPaintProperty(n+'-fyll','fill-opacity',synl);
+    KARTA.setFilter(n+'-graa',['in',['get',nyckel],['literal',strecka]]);
   }
   KARTA.setLayoutProperty('vdraster','visibility',STATE.lg_vd?'visible':'none');
   KARTA.setLayoutProperty('l22','visibility',STATE.lg_l22?'visible':'none');
@@ -555,7 +622,7 @@ function ritaLegend(){
       h+=' <span class="sw" style="background:'+f[i]+'"'+(i===4?' title="rikets nivå"':'')+'></span>'+
          (i===4?'<b>'+fmtV(g[3])+'</b> ':'')+fmtV(g[i]);
     h+=' <span class="sw" style="background:'+f[f.length-1]+'"></span>över '+fmtV(g[g.length-1]);
-    h+=' <span class="sw" style="background:#b9adaa"></span>för få röster';
+    h+=' <span class="sw sw-graa"></span>för få röster';
     L.innerHTML=h
     //' | fet gräns = rikets nivå ('+SKALA.antalUnder+' områden under, '+SKALA.antalOver+' över)';
   }
@@ -722,7 +789,7 @@ function ritaDetalj(){
       (niva==='kluster'?'| '+esc(d.kommun):'')+'</span></h3>'+
     '<div style="margin-bottom:9px"><span class="pill '+d.betyg+'">Betyg '+d.betyg+'</span>'+
       (d.al>DATA.meta.trosk_lagt?'<span class="pill flag" style="margin-left:6px">Lågt valdeltagande 2022</span>':'')+
-      (graa(d)?'<span class="pill" style="background:#b9adaa;color:#fff;margin-left:6px">För få röster</span>':'')+
+      (graa(d)?'<span class="pill pill-graa" style="margin-left:6px">För få röster</span>':'')+
     '</div><dl class="kv">'+
       '<dt>Röster 2026 t.o.m. dag '+ROWS.N+'</dt><dd>'+num(d.r26)+'</dd>'+
       '<dt>Röster 2022, samma tid</dt><dd>'+num(d.r22)+'</dd>'+
